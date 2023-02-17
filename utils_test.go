@@ -3,17 +3,9 @@ package winter
 import (
 	"bytes"
 	"github.com/stretchr/testify/require"
-	"net/http"
 	"net/http/httptest"
 	"testing"
 )
-
-func TestRespondInternal(t *testing.T) {
-	rw := httptest.NewRecorder()
-	internalRespond(rw, "OK", http.StatusTeapot)
-	require.Equal(t, rw.Code, http.StatusTeapot)
-	require.Equal(t, rw.Body.String(), "OK")
-}
 
 func TestFlattenSimpleSlice(t *testing.T) {
 	require.Equal(t, "a", flattenSingleSlice([]string{"a"}))

@@ -8,15 +8,15 @@ import (
 	"net/http"
 )
 
-// Get get [resty.Client]
-func Get(c winter.Context, opts ...Option) *resty.Client {
-	opt := createOptions(opts...)
-	return c.Value(opt.key).(*resty.Client)
+// R create a resty.Request from context
+func R(ctx context.Context, opts ...Option) *resty.Request {
+	return Get(ctx, opts...).R().SetContext(ctx)
 }
 
-// R create a resty.Request from context
-func R(c winter.Context, opts ...Option) *resty.Request {
-	return Get(c, opts...).R().SetContext(c)
+// Get get [resty.Client]
+func Get(ctx context.Context, opts ...Option) *resty.Client {
+	opt := createOptions(opts...)
+	return ctx.Value(opt.key).(*resty.Client)
 }
 
 // Install install component

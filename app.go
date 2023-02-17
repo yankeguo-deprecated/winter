@@ -10,7 +10,7 @@ import (
 )
 
 // HandlerFunc handler func with [Context] as argument
-type HandlerFunc func(ctx Context)
+type HandlerFunc func(c Context)
 
 // App the main interface of [summer]
 type App interface {
@@ -58,28 +58,15 @@ func (a *app) HandleFunc(pattern string, fn HandlerFunc) {
 	)
 }
 
-func (a *app) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
-	// alive, ready, metrics
-	if req.URL.Path == a.opts.readinessPath {
-		// readiness first, works when readinessPath == livenessPath
-		sb := &strings.Builder{}
-		var failed bool
-		a.Check(req.Context(), func(name string, err error) {
-			if sb.Len() > 0 {
-				sb.WriteString("\n")
-			}
-			sb.WriteString(name)
-			if err == nil {
-				sb.WriteString(": OK")
-			} else {
-				failed = true
-				sb.WriteString(": ")
-				sb.WriteString(err.Error())
-			}
-		})
-		if sb.Len() == 0 {
-			sb.WriteString("OK")
-		}
+func (a *app) serveReadiness(rw http.ResponseWriter, req *http.Request) {
+	c := newContext(rw, req)
+	defer c.Perform()
+
+	a.Wrap(func(c Context) {
+		cr := &checkResult{}
+		a.Check(c, cr.Collect)
+		s, failed := cr.Result()
+
 		status := http.StatusOK
 		if failed {
 			atomic.AddInt64(&a.failed, 1)
@@ -87,14 +74,37 @@ func (a *app) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		} else {
 			atomic.StoreInt64(&a.failed, 0)
 		}
-		internalRespond(rw, sb.String(), status)
+
+		c.Code(status)
+		c.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+		c.Text(s)
+	})(c)
+}
+
+func (a *app) serveLiveness(rw http.ResponseWriter, req *http.Request) {
+	c := newContext(rw, req)
+	defer c.Perform()
+
+	c.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+
+	if a.opts.readinessCascade > 0 &&
+		atomic.LoadInt64(&a.failed) > a.opts.readinessCascade {
+		c.Code(http.StatusInternalServerError)
+		c.Text("CASCADED")
+	} else {
+		c.Code(http.StatusOK)
+		c.Text("OK")
+	}
+}
+
+func (a *app) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+	// alive, ready, metrics
+	if req.URL.Path == a.opts.readinessPath {
+		// support readinessPath == livenessPath
+		a.serveReadiness(rw, req)
 		return
 	} else if req.URL.Path == a.opts.livenessPath {
-		if a.opts.readinessCascade > 0 && atomic.LoadInt64(&a.failed) > a.opts.readinessCascade {
-			internalRespond(rw, "CASCADED", http.StatusInternalServerError)
-		} else {
-			internalRespond(rw, "OK", http.StatusOK)
-		}
+		a.serveLiveness(rw, req)
 		return
 	} else if req.URL.Path == a.opts.metricsPath {
 		a.hProm.ServeHTTP(rw, req)

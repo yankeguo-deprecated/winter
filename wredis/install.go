@@ -8,7 +8,7 @@ import (
 )
 
 // Get get component
-func Get(ctx winter.Context, opts ...Option) *redis.Client {
+func Get(ctx context.Context, opts ...Option) *redis.Client {
 	opt := createOptions(opts...)
 	return ctx.Value(opt.key).(*redis.Client)
 }
