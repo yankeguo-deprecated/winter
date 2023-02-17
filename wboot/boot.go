@@ -17,7 +17,8 @@ import (
 	"time"
 )
 
-func Main(a winter.App) {
+// Main best practice of running a [winter.App]
+func Main(fn func() (a winter.App, err error)) {
 	var err error
 	defer func() {
 		if err == nil {
@@ -41,6 +42,7 @@ func Main(a winter.App) {
 
 	ctx := context.Background()
 
+	a := rg.Must(fn())
 	rg.Must0(a.Startup(ctx))
 	defer a.Shutdown(ctx)
 
