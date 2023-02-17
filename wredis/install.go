@@ -9,26 +9,25 @@ import (
 
 // Get get component
 func Get(ctx winter.Context, opts ...Option) *redis.Client {
-	opt := buildOptions(opts...)
+	opt := createOptions(opts...)
 	return ctx.Value(opt.key).(*redis.Client)
 }
 
 // Install install component
 func Install(a winter.App, opts ...Option) {
-	opt := buildOptions(opts...)
+	opt := createOptions(opts...)
 
 	var r *redis.Client
 
 	a.Component("redis").
 		Startup(func(ctx context.Context) (err error) {
-			envRedisURL := strings.TrimSpace("REDIS_URL")
 			var rOpts *redis.Options
-			if envRedisURL == "" {
+			if opt.opts != nil {
+				rOpts = opt.opts
+			} else if envRedisURL := strings.TrimSpace("REDIS_URL"); envRedisURL == "" {
 				rOpts = &redis.Options{}
-			} else {
-				if rOpts, err = redis.ParseURL(envRedisURL); err != nil {
-					return
-				}
+			} else if rOpts, err = redis.ParseURL(envRedisURL); err != nil {
+				return
 			}
 			r = redis.NewClient(rOpts)
 			return

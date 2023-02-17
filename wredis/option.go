@@ -1,5 +1,7 @@
 package wredis
 
+import "github.com/redis/go-redis/v9"
+
 type KeyType string
 
 const (
@@ -16,11 +18,19 @@ func WithKey(k KeyType) Option {
 	}
 }
 
-type options struct {
-	key KeyType
+// WithOptions with [redis.Options]
+func WithOptions(rOpts *redis.Options) Option {
+	return func(opts *options) {
+		opts.opts = rOpts
+	}
 }
 
-func buildOptions(opts ...Option) *options {
+type options struct {
+	key  KeyType
+	opts *redis.Options
+}
+
+func createOptions(opts ...Option) *options {
 	opt := &options{
 		key: Default,
 	}
