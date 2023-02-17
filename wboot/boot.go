@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/guoyk93/rg"
 	"github.com/guoyk93/winter"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/contrib/propagators/b3"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/zipkin"
@@ -39,6 +40,12 @@ func Main(fn func() (a winter.App, err error)) {
 			b3.New(b3.WithInjectEncoding(b3.B3MultipleHeader|b3.B3SingleHeader)),
 		),
 	)
+
+	// re-initialize otelhttp.DefaultClient and http.DefaultClient
+	otelhttp.DefaultClient = &http.Client{
+		Transport: otelhttp.NewTransport(http.DefaultTransport),
+	}
+	http.DefaultClient = otelhttp.DefaultClient
 
 	ctx := context.Background()
 

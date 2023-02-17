@@ -12,9 +12,9 @@ const (
 type Option func(opts *options)
 
 // WithKey change key for injection
-func WithKey(k KeyType) Option {
+func WithKey(k string) Option {
 	return func(opts *options) {
-		opts.key = k
+		opts.key = KeyType(k)
 	}
 }
 

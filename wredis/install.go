@@ -36,11 +36,11 @@ func Install(a winter.App, opts ...Option) {
 			return r.Ping(ctx).Err()
 		}).
 		Middleware(func(h winter.HandlerFunc) winter.HandlerFunc {
-			return func(ctx winter.Context) {
-				ctx.Inject(func(ctx context.Context) context.Context {
+			return func(c winter.Context) {
+				c.Inject(func(ctx context.Context) context.Context {
 					return context.WithValue(ctx, opt.key, r)
 				})
-				h(ctx)
+				h(c)
 			}
 		}).
 		Shutdown(func(ctx context.Context) error {
