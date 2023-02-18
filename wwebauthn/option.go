@@ -1,4 +1,4 @@
-package wresty
+package wwebauthn
 
 import (
 	"github.com/go-webauthn/webauthn/webauthn"

@@ -1,4 +1,4 @@
-package wresty
+package wwebauthn
 
 import (
 	"context"
