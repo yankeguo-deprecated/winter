@@ -4,10 +4,9 @@ import (
 	"context"
 	"github.com/guoyk93/winter"
 	"github.com/redis/go-redis/v9"
-	"strings"
 )
 
-// Get get component
+// Get get previously injected [redis.Client]
 func Get(ctx context.Context, opts ...Option) *redis.Client {
 	opt := createOptions(opts...)
 	return ctx.Value(opt.key).(*redis.Client)
@@ -19,15 +18,15 @@ func Install(a winter.App, opts ...Option) {
 
 	var r *redis.Client
 
-	a.Component("redis").
+	a.Component("redis-" + string(opt.key)).
 		Startup(func(ctx context.Context) (err error) {
-			var rOpts *redis.Options
+			rOpts := &redis.Options{}
 			if opt.opts != nil {
 				rOpts = opt.opts
-			} else if envRedisURL := strings.TrimSpace("REDIS_URL"); envRedisURL == "" {
-				rOpts = &redis.Options{}
-			} else if rOpts, err = redis.ParseURL(envRedisURL); err != nil {
-				return
+			} else if opt.url != "" {
+				if rOpts, err = redis.ParseURL(opt.url); err != nil {
+					return
+				}
 			}
 			r = redis.NewClient(rOpts)
 			return

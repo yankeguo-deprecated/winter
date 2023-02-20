@@ -1,4 +1,4 @@
-package wresty
+package wsnowid
 
 import (
 	"context"
@@ -6,8 +6,6 @@ import (
 	"github.com/guoyk93/rg"
 	"github.com/guoyk93/winter"
 	"github.com/guoyk93/winter/wresty"
-	"os"
-	"strings"
 )
 
 // Next return a new id
@@ -37,13 +35,7 @@ func NextN(ctx context.Context, size int, opts ...Option) []string {
 func Install(a winter.App, opts ...Option) {
 	opt := createOptions(opts...)
 
-	a.Component("snowid").
-		Startup(func(ctx context.Context) (err error) {
-			if opt.url == "" {
-				opt.url = strings.TrimSpace(os.Getenv("SNOWID_URL"))
-			}
-			return
-		}).
+	a.Component("snowid-" + string(opt.key)).
 		Check(func(ctx context.Context) (err error) {
 			defer rg.Guard(&err)
 			_ = Next(ctx, opts...)

@@ -25,7 +25,7 @@ func Install(a winter.App, opts ...Option) {
 
 	var c *resty.Client
 
-	a.Component("resty").
+	a.Component("resty-" + string(opt.key)).
 		Startup(func(ctx context.Context) (err error) {
 			// using transport with otelhttp
 			hc := &http.Client{

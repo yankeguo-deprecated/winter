@@ -16,7 +16,7 @@ func Install(a winter.App, opts ...Option) {
 
 	var w *webauthn.WebAuthn
 
-	a.Component("webauthn").
+	a.Component("webauthn-" + string(opt.key)).
 		Startup(func(ctx context.Context) (err error) {
 			w, err = webauthn.New(opt.cfg)
 			return

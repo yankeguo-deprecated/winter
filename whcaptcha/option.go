@@ -1,4 +1,4 @@
-package wsnowid
+package whcaptcha
 
 import "github.com/guoyk93/winter/wresty"
 
@@ -25,17 +25,25 @@ func WithRestyKey(k string) Option {
 	}
 }
 
-// WithURL set url of snowid service
-func WithURL(u string) Option {
+// WithSiteKey set siteKey of snowid service
+func WithSiteKey(u string) Option {
 	return func(opts *options) {
-		opts.url = u
+		opts.siteKey = u
+	}
+}
+
+// WithSecret set secret of hcaptcha service
+func WithSecret(u string) Option {
+	return func(opts *options) {
+		opts.secret = u
 	}
 }
 
 type options struct {
-	key  KeyType
-	url  string
-	rKey wresty.KeyType
+	key     KeyType
+	rKey    wresty.KeyType
+	siteKey string
+	secret  string
 }
 
 func createOptions(opts ...Option) *options {

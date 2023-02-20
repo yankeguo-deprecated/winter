@@ -18,7 +18,14 @@ func WithKey(k string) Option {
 	}
 }
 
-// WithOptions with [redis.Options]
+// WithURL set env key for redis options loading
+func WithURL(k string) Option {
+	return func(opts *options) {
+		opts.url = k
+	}
+}
+
+// WithOptions set [redis.Options] directly
 func WithOptions(rOpts *redis.Options) Option {
 	return func(opts *options) {
 		opts.opts = rOpts
@@ -28,6 +35,7 @@ func WithOptions(rOpts *redis.Options) Option {
 type options struct {
 	key  KeyType
 	opts *redis.Options
+	url  string
 }
 
 func createOptions(opts ...Option) *options {
