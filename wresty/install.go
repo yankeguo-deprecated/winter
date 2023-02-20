@@ -23,7 +23,7 @@ func Get(ctx context.Context, opts ...Option) *resty.Client {
 func Install(a winter.App, opts ...Option) {
 	opt := createOptions(opts...)
 
-	var c *resty.Client
+	var rc *resty.Client
 
 	a.Component("resty-" + string(opt.key)).
 		Startup(func(ctx context.Context) (err error) {
@@ -34,16 +34,16 @@ func Install(a winter.App, opts ...Option) {
 			if opt.hcSetup != nil {
 				hc = opt.hcSetup(hc)
 			}
-			c = resty.NewWithClient(hc)
+			rc = resty.NewWithClient(hc)
 			if opt.rSetup != nil {
-				c = opt.rSetup(c)
+				rc = opt.rSetup(rc)
 			}
 			return
 		}).
 		Middleware(func(h winter.HandlerFunc) winter.HandlerFunc {
 			return func(c winter.Context) {
 				c.Inject(func(ctx context.Context) context.Context {
-					return context.WithValue(ctx, opt.key, c)
+					return context.WithValue(ctx, opt.key, rc)
 				})
 				h(c)
 			}
