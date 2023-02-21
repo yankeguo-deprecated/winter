@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/go-resty/resty/v2 v2.7.0
-	github.com/go-webauthn/webauthn v0.7.1
+	github.com/go-webauthn/webauthn v0.8.1
 	github.com/guoyk93/rg v1.0.0
 	github.com/prometheus/client_golang v1.14.0
 	github.com/redis/go-redis/v9 v9.0.2
