@@ -11,14 +11,16 @@ const (
 type options struct {
 	key KeyType
 
-	jwkKey wjwk.KeyType
-	issuer string
+	jwkKey        wjwk.KeyType
+	payloadHeader string
+	issuer        string
 }
 
 func createOptions(opts ...Option) *options {
 	opt := &options{
-		key:    Default,
-		jwkKey: wjwk.Default,
+		key:           Default,
+		jwkKey:        wjwk.Default,
+		payloadHeader: "X-JWT-Payload",
 	}
 	for _, item := range opts {
 		item(opt)
@@ -47,5 +49,12 @@ func WithJWKKey(s string) Option {
 func WithIssuer(s string) Option {
 	return func(opts *options) {
 		opts.issuer = s
+	}
+}
+
+// WithPayloadHeader set payload header set by Istio RequestAuthentication
+func WithPayloadHeader(s string) Option {
+	return func(opts *options) {
+		opts.payloadHeader = s
 	}
 }

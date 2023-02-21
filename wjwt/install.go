@@ -2,12 +2,26 @@ package wjwt
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/guoyk93/rg"
 	"github.com/guoyk93/winter"
 	"github.com/guoyk93/winter/wjwk"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"time"
 )
+
+// Get get JWT Payload from Istio RequestAuthentication header
+func Get(c winter.Context, opts ...Option) jwt.Token {
+	o := c.Value(createOptions(opts...).key).(*options)
+	t := jwt.New()
+	var m map[string]any
+	buf := []byte(c.Req().Header.Get(o.payloadHeader))
+	rg.Must0(json.Unmarshal(buf, &m))
+	for k, v := range m {
+		t.Set(k, v)
+	}
+	return t
+}
 
 // Sign create a signed JWT
 func Sign(ctx context.Context, fn func(b *jwt.Builder) *jwt.Builder, opts ...Option) string {
