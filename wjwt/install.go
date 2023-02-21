@@ -16,7 +16,7 @@ func Get(c winter.Context, opts ...Option) jwt.Token {
 	o := c.Value(createOptions(opts...).key).(*options)
 
 	buf := rg.Must(
-		base64.URLEncoding.DecodeString(c.Req().Header.Get(o.payloadHeader)),
+		base64.RawURLEncoding.DecodeString(c.Req().Header.Get(o.payloadHeader)),
 	)
 
 	var m map[string]any
