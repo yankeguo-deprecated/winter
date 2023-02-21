@@ -8,23 +8,23 @@ import (
 
 // Get get previously injected [redis.Client]
 func Get(ctx context.Context, opts ...Option) *redis.Client {
-	opt := createOptions(opts...)
-	return ctx.Value(opt.key).(*redis.Client)
+	o := createOptions(opts...)
+	return ctx.Value(o.key).(*redis.Client)
 }
 
 // Install install component
 func Install(a winter.App, opts ...Option) {
-	opt := createOptions(opts...)
+	o := createOptions(opts...)
 
 	var r *redis.Client
 
-	a.Component("redis-" + string(opt.key)).
+	a.Component("redis-" + string(o.key)).
 		Startup(func(ctx context.Context) (err error) {
 			rOpts := &redis.Options{}
-			if opt.opts != nil {
-				rOpts = opt.opts
-			} else if opt.url != "" {
-				if rOpts, err = redis.ParseURL(opt.url); err != nil {
+			if o.opts != nil {
+				rOpts = o.opts
+			} else if o.url != "" {
+				if rOpts, err = redis.ParseURL(o.url); err != nil {
 					return
 				}
 			}
@@ -37,7 +37,7 @@ func Install(a winter.App, opts ...Option) {
 		Middleware(func(h winter.HandlerFunc) winter.HandlerFunc {
 			return func(c winter.Context) {
 				c.Inject(func(ctx context.Context) context.Context {
-					return context.WithValue(ctx, opt.key, r)
+					return context.WithValue(ctx, o.key, r)
 				})
 				h(c)
 			}

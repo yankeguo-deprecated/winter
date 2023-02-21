@@ -162,6 +162,9 @@ func (a *registry) Shutdown(ctx context.Context) (err error) {
 	defer a.mu.Unlock()
 
 	for _, item := range a.init {
+		if item.shutdown == nil {
+			continue
+		}
 		if err1 := item.shutdown(ctx); err1 != nil {
 			if err == nil {
 				err = err1

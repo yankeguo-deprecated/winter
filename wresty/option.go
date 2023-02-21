@@ -11,10 +11,26 @@ const (
 	Default KeyType = "default"
 )
 
-// Option function modifying options
+type options struct {
+	key     KeyType
+	rSetup  func(r *resty.Client) *resty.Client
+	hcSetup func(c *http.Client) *http.Client
+}
+
+func createOptions(opts ...Option) *options {
+	opt := &options{
+		key: Default,
+	}
+	for _, item := range opts {
+		item(opt)
+	}
+	return opt
+}
+
+// Option option for installation
 type Option func(opts *options)
 
-// WithKey change key for injection
+// WithKey set injection key
 func WithKey(k string) Option {
 	return func(opts *options) {
 		opts.key = KeyType(k)
@@ -33,20 +49,4 @@ func WithHTTPClientSetup(fn func(hc *http.Client) *http.Client) Option {
 	return func(opts *options) {
 		opts.hcSetup = fn
 	}
-}
-
-type options struct {
-	key     KeyType
-	rSetup  func(r *resty.Client) *resty.Client
-	hcSetup func(c *http.Client) *http.Client
-}
-
-func createOptions(opts ...Option) *options {
-	opt := &options{
-		key: Default,
-	}
-	for _, item := range opts {
-		item(opt)
-	}
-	return opt
 }

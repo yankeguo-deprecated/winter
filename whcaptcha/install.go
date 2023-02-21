@@ -15,20 +15,19 @@ var (
 
 // Validate validate hcaptcha
 func Validate(c winter.Context, token string, opts ...Option) {
-	opt := createOptions(opts...)
-	opt = c.Value(opt.key).(*options)
+	o := c.Value(createOptions(opts...).key).(*options)
 	var ret struct {
 		Success bool `json:"success"`
 	}
-	res := rg.Must(wresty.R(c, wresty.WithKey(string(opt.rKey))).SetFormData(map[string]string{
-		"sitekey":  opt.siteKey,
-		"secret":   opt.secret,
+	res := rg.Must(wresty.R(c, wresty.WithKey(string(o.restyKey))).SetFormData(map[string]string{
+		"sitekey":  o.siteKey,
+		"secret":   o.secret,
 		"response": token,
 		"remoteip": wclientip.Get(c),
 	}).SetResult(&ret).Post("https://hcaptcha.com/siteverify"))
 
 	if res.IsError() {
-		winter.Halt(errors.New(res.String()))
+		winter.HaltString(res.String())
 	}
 	if !ret.Success {
 		winter.Halt(ErrInvalidToken)

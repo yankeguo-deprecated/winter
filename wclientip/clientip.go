@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// Get extract client ip from 'X-Forwarded-For' header
 func Get(c winter.Context) (o string) {
 	xff := strings.Join(c.Req().Header.Values("X-Forwarded-For"), ",")
 

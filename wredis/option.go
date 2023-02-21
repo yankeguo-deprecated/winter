@@ -8,30 +8,6 @@ const (
 	Default KeyType = "default"
 )
 
-// Option function modifying options
-type Option func(opts *options)
-
-// WithKey change key for injection
-func WithKey(k string) Option {
-	return func(opts *options) {
-		opts.key = KeyType(k)
-	}
-}
-
-// WithURL set env key for redis options loading
-func WithURL(k string) Option {
-	return func(opts *options) {
-		opts.url = k
-	}
-}
-
-// WithOptions set [redis.Options] directly
-func WithOptions(rOpts *redis.Options) Option {
-	return func(opts *options) {
-		opts.opts = rOpts
-	}
-}
-
 type options struct {
 	key  KeyType
 	opts *redis.Options
@@ -46,4 +22,28 @@ func createOptions(opts ...Option) *options {
 		item(opt)
 	}
 	return opt
+}
+
+// Option option for installation
+type Option func(opts *options)
+
+// WithKey set key for injection
+func WithKey(k string) Option {
+	return func(opts *options) {
+		opts.key = KeyType(k)
+	}
+}
+
+// WithURL set redis url
+func WithURL(k string) Option {
+	return func(opts *options) {
+		opts.url = k
+	}
+}
+
+// WithOptions set [redis.Options]
+func WithOptions(rOpts *redis.Options) Option {
+	return func(opts *options) {
+		opts.opts = rOpts
+	}
 }

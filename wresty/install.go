@@ -13,37 +13,37 @@ func R(ctx context.Context, opts ...Option) *resty.Request {
 	return Get(ctx, opts...).R().SetContext(ctx)
 }
 
-// Get get [resty.Client]
+// Get get previously injected [resty.Client]
 func Get(ctx context.Context, opts ...Option) *resty.Client {
-	opt := createOptions(opts...)
-	return ctx.Value(opt.key).(*resty.Client)
+	o := createOptions(opts...)
+	return ctx.Value(o.key).(*resty.Client)
 }
 
 // Install install component
 func Install(a winter.App, opts ...Option) {
-	opt := createOptions(opts...)
+	o := createOptions(opts...)
 
 	var rc *resty.Client
 
-	a.Component("resty-" + string(opt.key)).
+	a.Component("resty-" + string(o.key)).
 		Startup(func(ctx context.Context) (err error) {
 			// using transport with otelhttp
 			hc := &http.Client{
 				Transport: otelhttp.NewTransport(http.DefaultTransport),
 			}
-			if opt.hcSetup != nil {
-				hc = opt.hcSetup(hc)
+			if o.hcSetup != nil {
+				hc = o.hcSetup(hc)
 			}
 			rc = resty.NewWithClient(hc)
-			if opt.rSetup != nil {
-				rc = opt.rSetup(rc)
+			if o.rSetup != nil {
+				rc = o.rSetup(rc)
 			}
 			return
 		}).
 		Middleware(func(h winter.HandlerFunc) winter.HandlerFunc {
 			return func(c winter.Context) {
 				c.Inject(func(ctx context.Context) context.Context {
-					return context.WithValue(ctx, opt.key, rc)
+					return context.WithValue(ctx, o.key, rc)
 				})
 				h(c)
 			}
