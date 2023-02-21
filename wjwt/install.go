@@ -2,6 +2,7 @@ package wjwt
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"github.com/guoyk93/rg"
 	"github.com/guoyk93/winter"
@@ -13,10 +14,15 @@ import (
 // Get get JWT Payload from Istio RequestAuthentication header
 func Get(c winter.Context, opts ...Option) jwt.Token {
 	o := c.Value(createOptions(opts...).key).(*options)
-	t := jwt.New()
+
+	buf := rg.Must(
+		base64.URLEncoding.DecodeString(c.Req().Header.Get(o.payloadHeader)),
+	)
+
 	var m map[string]any
-	buf := []byte(c.Req().Header.Get(o.payloadHeader))
 	rg.Must0(json.Unmarshal(buf, &m))
+
+	t := jwt.New()
 	for k, v := range m {
 		t.Set(k, v)
 	}
