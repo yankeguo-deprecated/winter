@@ -54,7 +54,7 @@ func Main(fn func() (a winter.App, err error)) {
 	defer a.Shutdown(ctx)
 
 	s := &http.Server{
-		Addr:    envOr("BIND", "") + ":" + envOr("PORT", "8080"),
+		Addr:    EnvStr("BIND") + ":" + EnvStrOr("PORT", "8080"),
 		Handler: a,
 	}
 
