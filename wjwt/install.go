@@ -8,6 +8,7 @@ import (
 	"github.com/guoyk93/winter"
 	"github.com/guoyk93/winter/wjwk"
 	"github.com/lestrrat-go/jwx/v2/jwt"
+	"strings"
 	"time"
 )
 
@@ -15,9 +16,27 @@ import (
 func Get(c winter.Context, opts ...Option) jwt.Token {
 	o := c.Value(createOptions(opts...).key).(*options)
 
-	buf := rg.Must(
-		base64.RawURLEncoding.DecodeString(c.Req().Header.Get(o.payloadHeader)),
-	)
+	var pl string
+
+	if o.debugPayload {
+		splits := strings.Split(
+			strings.TrimSpace(
+				strings.TrimPrefix(
+					strings.TrimSpace(c.Req().Header.Get("Authorization")),
+					"Bearer",
+				),
+			),
+			".",
+		)
+
+		if len(splits) == 3 {
+			pl = splits[1]
+		}
+	} else {
+		pl = c.Req().Header.Get(o.payloadHeader)
+	}
+
+	buf := rg.Must(base64.RawURLEncoding.DecodeString(pl))
 
 	var m map[string]any
 	rg.Must0(json.Unmarshal(buf, &m))

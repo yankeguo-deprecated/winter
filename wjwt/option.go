@@ -14,6 +14,7 @@ type options struct {
 	jwkKey        wjwk.KeyType
 	payloadHeader string
 	issuer        string
+	debugPayload  bool
 }
 
 func createOptions(opts ...Option) *options {
@@ -56,5 +57,12 @@ func WithIssuer(s string) Option {
 func WithPayloadHeader(s string) Option {
 	return func(opts *options) {
 		opts.payloadHeader = s
+	}
+}
+
+// WithDebugPayload set debugPayload mode, when on, will extract Payload from 'Authorization' header without validating
+func WithDebugPayload(d bool) Option {
+	return func(opts *options) {
+		opts.debugPayload = d
 	}
 }
