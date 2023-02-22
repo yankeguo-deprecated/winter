@@ -16,7 +16,7 @@ type Instance[OPTS any, INJ any] interface {
 
 	Get(ctx context.Context) INJ
 
-	Middleware(inj INJ) func(h winter.HandlerFunc) winter.HandlerFunc
+	Middleware(inj *INJ) func(h winter.HandlerFunc) winter.HandlerFunc
 }
 
 type instance[OPTS any, INJ any] struct {
@@ -39,11 +39,11 @@ func (e *instance[OPTS, INJ]) Get(ctx context.Context) INJ {
 	return ctx.Value(e.ContextKey()).(INJ)
 }
 
-func (e *instance[OPTS, INJ]) Middleware(inj INJ) func(h winter.HandlerFunc) winter.HandlerFunc {
+func (e *instance[OPTS, INJ]) Middleware(inj *INJ) func(h winter.HandlerFunc) winter.HandlerFunc {
 	return func(h winter.HandlerFunc) winter.HandlerFunc {
 		return func(c winter.Context) {
 			c.Inject(func(ctx context.Context) context.Context {
-				return e.Set(ctx, inj)
+				return e.Set(ctx, *inj)
 			})
 			h(c)
 		}

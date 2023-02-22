@@ -26,6 +26,6 @@ func Installer(opts ...Option) wext.Installer {
 				w, err = webauthn.New(o.cfg)
 				return
 			}).
-			Middleware(ins.Middleware(w))
+			Middleware(ins.Middleware(&w))
 	})
 }

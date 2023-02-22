@@ -52,7 +52,7 @@ func Installer(opts ...Option) wext.Installer {
 				_ = Next(ctx, altKeys...)
 				return
 			}).
-			Middleware(ins.Middleware(o))
+			Middleware(ins.Middleware(&o))
 	})
 
 }

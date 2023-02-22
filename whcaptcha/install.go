@@ -42,6 +42,6 @@ func Installer(opts ...Option) wext.Installer {
 	return wext.WrapInstaller(func(a winter.App, altKeys ...string) {
 		ins := Ext.Instance(altKeys...)
 
-		a.Component(ins.Key()).Middleware(ins.Middleware(o))
+		a.Component(ins.Key()).Middleware(ins.Middleware(&o))
 	})
 }

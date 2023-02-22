@@ -37,7 +37,7 @@ func Installer(opts ...Option) wext.Installer {
 			Check(func(ctx context.Context) error {
 				return r.Ping(ctx).Err()
 			}).
-			Middleware(ins.Middleware(r)).
+			Middleware(ins.Middleware(&r)).
 			Shutdown(func(ctx context.Context) error {
 				return r.Close()
 			})

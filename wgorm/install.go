@@ -46,6 +46,6 @@ func Installer(opts ...Option) wext.Installer {
 			Check(func(ctx context.Context) error {
 				return inj.db.WithContext(ctx).Select("SELECT 1").Error
 			}).
-			Middleware(ins.Middleware(inj))
+			Middleware(ins.Middleware(&inj))
 	})
 }

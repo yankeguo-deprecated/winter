@@ -31,7 +31,7 @@ func Installer(opts ...Option) wext.Installer {
 				}
 				return
 			}).
-			Middleware(ins.Middleware(k))
+			Middleware(ins.Middleware(&k))
 	})
 
 }
