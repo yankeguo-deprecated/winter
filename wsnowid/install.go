@@ -4,30 +4,32 @@ import (
 	"context"
 	"github.com/guoyk93/rg"
 	"github.com/guoyk93/winter"
+	"github.com/guoyk93/winter/wext"
 	"github.com/guoyk93/winter/wresty"
 	"strconv"
 )
 
 // Next return a new id
-func Next(ctx context.Context, opts ...Option) string {
-	return NextN(ctx, 1, opts...)[0]
+func Next(ctx context.Context, altKeys ...string) string {
+	return NextN(ctx, 1, altKeys...)[0]
 }
 
 // NextN return n ids generated from snowid service
-func NextN(ctx context.Context, size int, opts ...Option) []string {
+func NextN(ctx context.Context, size int, altKeys ...string) []string {
 	if size < 1 {
 		winter.HaltString("wsnowid: invalid argument: size", winter.HaltWithBadRequest())
 	}
 
-	o := ctx.Value(createOptions(opts...).key).(*options)
+	o := Ext.Instance(altKeys...).Get(ctx)
 
 	var ret []string
 	res := rg.Must(
-		wresty.R(ctx, wresty.WithKey(string(o.restyKey))).
+		wresty.R(ctx, o.restyKeys...).
 			SetQueryParam("size", strconv.Itoa(size)).
 			SetResult(&ret).
 			Get(o.url),
 	)
+
 	if res.IsError() {
 		winter.HaltString(res.String())
 	}
@@ -37,22 +39,20 @@ func NextN(ctx context.Context, size int, opts ...Option) []string {
 	return ret
 }
 
-// Install install component
-func Install(a winter.App, opts ...Option) {
-	o := createOptions(opts...)
+// Installer install component
+func Installer(a winter.App, opts ...Option) wext.Installer {
+	o := Ext.Options(opts...)
 
-	a.Component("snowid-" + string(o.key)).
-		Check(func(ctx context.Context) (err error) {
-			defer rg.Guard(&err)
-			_ = Next(ctx, opts...)
-			return
-		}).
-		Middleware(func(h winter.HandlerFunc) winter.HandlerFunc {
-			return func(c winter.Context) {
-				c.Inject(func(ctx context.Context) context.Context {
-					return context.WithValue(ctx, o.key, o)
-				})
-				h(c)
-			}
-		})
+	return wext.WrapInstaller(func(altKeys ...string) {
+		ins := Ext.Instance(altKeys...)
+
+		a.Component(ins.Key()).
+			Check(func(ctx context.Context) (err error) {
+				defer rg.Guard(&err)
+				_ = Next(ctx, altKeys...)
+				return
+			}).
+			Middleware(ins.Middleware(o))
+	})
+
 }

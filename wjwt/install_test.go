@@ -22,9 +22,8 @@ func TestInstall(t *testing.T) {
 	k.Set(jwk.KeyUsageKey, jwk.ForSignature)
 	k.Set(jwk.AlgorithmKey, jwa.KeyAlgorithmFrom(jwa.RS256))
 	ctx := context.Background()
-	ctx = context.WithValue(ctx, wjwk.KeyType("test"), k)
-	ctx = context.WithValue(ctx, KeyType("test"), createOptions(
-		WithKey("test"),
+	ctx = context.WithValue(ctx, wjwk.Ext.Instance("test").ContextKey(), k)
+	ctx = context.WithValue(ctx, Ext.Instance("test").ContextKey(), Ext.Options(
 		WithIssuer("test-issuer"),
 		WithJWKKey("test"),
 	))
@@ -33,7 +32,7 @@ func TestInstall(t *testing.T) {
 		defer rg.Guard(&err)
 		s = Sign(ctx, func(b *jwt.Builder) *jwt.Builder {
 			return b.Subject("test-sub")
-		}, WithKey("test"))
+		}, "test")
 	}()
 	require.NoError(t, err)
 	require.Equal(t, 3, len(strings.Split(s, ".")))

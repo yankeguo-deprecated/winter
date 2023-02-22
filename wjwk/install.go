@@ -4,36 +4,34 @@ import (
 	"context"
 	"errors"
 	"github.com/guoyk93/winter"
+	"github.com/guoyk93/winter/wext"
 	"github.com/lestrrat-go/jwx/v2/jwk"
 )
 
 // Get get previously injected [jwk.Key]
-func Get(ctx context.Context, opts ...Option) jwk.Key {
-	o := createOptions(opts...)
-	return ctx.Value(o.key).(jwk.Key)
+func Get(ctx context.Context, altKeys ...string) jwk.Key {
+	return Ext.Instance(altKeys...).Get(ctx)
 }
 
-// Install install component
-func Install(a winter.App, opts ...Option) {
-	o := createOptions(opts...)
+// Installer install component
+func Installer(a winter.App, opts ...Option) wext.Installer {
+	o := Ext.Options(opts...)
 
-	var k jwk.Key
+	return wext.WrapInstaller(func(altKeys ...string) {
+		ins := Ext.Instance(altKeys...)
 
-	a.Component("jwk-" + string(o.key)).
-		Startup(func(ctx context.Context) (err error) {
-			if len(o.raw) != 0 {
-				k, err = jwk.ParseKey(o.raw)
-			} else {
-				err = errors.New("failed loading jwk")
-			}
-			return
-		}).
-		Middleware(func(h winter.HandlerFunc) winter.HandlerFunc {
-			return func(c winter.Context) {
-				c.Inject(func(ctx context.Context) context.Context {
-					return context.WithValue(ctx, o.key, k)
-				})
-				h(c)
-			}
-		})
+		var k jwk.Key
+
+		a.Component(ins.Key()).
+			Startup(func(ctx context.Context) (err error) {
+				if len(o.raw) != 0 {
+					k, err = jwk.ParseKey(o.raw)
+				} else {
+					err = errors.New("wjwk: missing key source")
+				}
+				return
+			}).
+			Middleware(ins.Middleware(k))
+	})
+
 }

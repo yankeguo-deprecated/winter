@@ -4,31 +4,28 @@ import (
 	"context"
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/guoyk93/winter"
+	"github.com/guoyk93/winter/wext"
 )
 
 // Get get previously injected [webauthn.WebAuthn]
-func Get(ctx context.Context, opts ...Option) *webauthn.WebAuthn {
-	o := createOptions(opts...)
-	return ctx.Value(o.key).(*webauthn.WebAuthn)
+func Get(ctx context.Context, altKeys ...string) *webauthn.WebAuthn {
+	return Ext.Instance(altKeys...).Get(ctx)
 }
 
-// Install install component
-func Install(a winter.App, opts ...Option) {
-	o := createOptions(opts...)
+// Installer install component
+func Installer(a winter.App, opts ...Option) wext.Installer {
+	o := Ext.Options(opts...)
 
-	var w *webauthn.WebAuthn
+	return wext.WrapInstaller(func(altKeys ...string) {
+		ins := Ext.Instance(altKeys...)
 
-	a.Component("webauthn-" + string(o.key)).
-		Startup(func(ctx context.Context) (err error) {
-			w, err = webauthn.New(o.cfg)
-			return
-		}).
-		Middleware(func(h winter.HandlerFunc) winter.HandlerFunc {
-			return func(c winter.Context) {
-				c.Inject(func(ctx context.Context) context.Context {
-					return context.WithValue(ctx, o.key, w)
-				})
-				h(c)
-			}
-		})
+		var w *webauthn.WebAuthn
+
+		a.Component(ins.Key()).
+			Startup(func(ctx context.Context) (err error) {
+				w, err = webauthn.New(o.cfg)
+				return
+			}).
+			Middleware(ins.Middleware(w))
+	})
 }

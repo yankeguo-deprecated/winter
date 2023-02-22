@@ -1,42 +1,30 @@
 package wgorm
 
 import (
+	"github.com/guoyk93/winter/wext"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
-type KeyType string
-
-const (
-	Default KeyType = "default"
-)
-
 type options struct {
-	key         KeyType
 	mysqlDSN    string
 	mysqlConfig *mysql.Config
 	gormOptions []gorm.Option
+	debug       bool
 }
 
-func createOptions(opts ...Option) *options {
-	opt := &options{
-		key: Default,
-	}
-	for _, item := range opts {
-		item(opt)
-	}
-	return opt
+type injected struct {
+	db    *gorm.DB
+	debug bool
 }
 
 // Option option for installation
-type Option func(opts *options)
+type Option = func(opts *options)
 
-// WithKey set key for injection
-func WithKey(k string) Option {
-	return func(opts *options) {
-		opts.key = KeyType(k)
-	}
-}
+// Ext the [wext.Extension]
+var Ext = wext.New[options, *injected]("gorm", func() *options {
+	return &options{}
+})
 
 // WithMySQLDSN set MySQL DSN
 func WithMySQLDSN(k string) Option {
@@ -56,5 +44,12 @@ func WithMySQLConfig(cfg *mysql.Config) Option {
 func WithGORMOption(o gorm.Option) Option {
 	return func(opts *options) {
 		opts.gormOptions = append(opts.gormOptions, o)
+	}
+}
+
+// WithDebug set debug
+func WithDebug(d bool) Option {
+	return func(opts *options) {
+		opts.debug = d
 	}
 }

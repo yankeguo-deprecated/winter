@@ -1,45 +1,27 @@
 package whcaptcha
 
-import "github.com/guoyk93/winter/wresty"
-
-type KeyType string
-
-const (
-	Default KeyType = "default"
+import (
+	"github.com/guoyk93/winter/wext"
 )
 
 type options struct {
-	key      KeyType
-	restyKey wresty.KeyType
-	siteKey  string
-	secret   string
-}
-
-func createOptions(opts ...Option) *options {
-	opt := &options{
-		key:      Default,
-		restyKey: wresty.Default,
-	}
-	for _, item := range opts {
-		item(opt)
-	}
-	return opt
+	restyKeys []string
+	siteKey   string
+	secret    string
 }
 
 // Option option for installation
-type Option func(opts *options)
+type Option = func(opts *options)
 
-// WithKey set key for injection
-func WithKey(k string) Option {
-	return func(opts *options) {
-		opts.key = KeyType(k)
-	}
-}
+// Ext the [wext.Extension]
+var Ext = wext.New[options, *options]("hcaptcha", func() *options {
+	return &options{}
+})
 
 // WithRestyKey set key for [wresty] extraction
-func WithRestyKey(k string) Option {
+func WithRestyKey(k ...string) Option {
 	return func(opts *options) {
-		opts.restyKey = wresty.KeyType(k)
+		opts.restyKeys = k
 	}
 }
 

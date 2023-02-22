@@ -2,40 +2,22 @@ package wresty
 
 import (
 	"github.com/go-resty/resty/v2"
+	"github.com/guoyk93/winter/wext"
 	"net/http"
 )
 
-type KeyType string
-
-const (
-	Default KeyType = "default"
-)
-
 type options struct {
-	key     KeyType
 	rSetup  func(r *resty.Client) *resty.Client
 	hcSetup func(c *http.Client) *http.Client
 }
 
-func createOptions(opts ...Option) *options {
-	opt := &options{
-		key: Default,
-	}
-	for _, item := range opts {
-		item(opt)
-	}
-	return opt
-}
-
 // Option option for installation
-type Option func(opts *options)
+type Option = func(opts *options)
 
-// WithKey set injection key
-func WithKey(k string) Option {
-	return func(opts *options) {
-		opts.key = KeyType(k)
-	}
-}
+// Ext the [wext.Extension]
+var Ext = wext.New[options, *resty.Client]("resty", func() *options {
+	return &options{}
+})
 
 // WithRestySetup setup [resty.Client]
 func WithRestySetup(fn func(r *resty.Client) *resty.Client) Option {

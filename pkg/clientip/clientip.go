@@ -1,4 +1,4 @@
-package wclientip
+package clientip
 
 import (
 	"github.com/guoyk93/winter"

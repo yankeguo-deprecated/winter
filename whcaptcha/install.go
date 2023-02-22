@@ -1,11 +1,11 @@
 package whcaptcha
 
 import (
-	"context"
 	"errors"
 	"github.com/guoyk93/rg"
 	"github.com/guoyk93/winter"
-	"github.com/guoyk93/winter/wclientip"
+	"github.com/guoyk93/winter/pkg/clientip"
+	"github.com/guoyk93/winter/wext"
 	"github.com/guoyk93/winter/wresty"
 )
 
@@ -14,16 +14,17 @@ var (
 )
 
 // Validate validate hcaptcha
-func Validate(c winter.Context, token string, opts ...Option) {
-	o := c.Value(createOptions(opts...).key).(*options)
+func Validate(c winter.Context, token string, altKeys ...string) {
+	o := Ext.Instance(altKeys...).Get(c)
+
 	var ret struct {
 		Success bool `json:"success"`
 	}
-	res := rg.Must(wresty.R(c, wresty.WithKey(string(o.restyKey))).SetFormData(map[string]string{
+	res := rg.Must(wresty.R(c, o.restyKeys...).SetFormData(map[string]string{
 		"sitekey":  o.siteKey,
 		"secret":   o.secret,
 		"response": token,
-		"remoteip": wclientip.Get(c),
+		"remoteip": clientip.Get(c),
 	}).SetResult(&ret).Post("https://hcaptcha.com/siteverify"))
 
 	if res.IsError() {
@@ -34,17 +35,13 @@ func Validate(c winter.Context, token string, opts ...Option) {
 	}
 }
 
-// Install install component
-func Install(a winter.App, opts ...Option) {
-	opt := createOptions(opts...)
+// Installer install component
+func Installer(a winter.App, opts ...Option) wext.Installer {
+	o := Ext.Options(opts...)
 
-	a.Component("hcaptcha-" + string(opt.key)).
-		Middleware(func(h winter.HandlerFunc) winter.HandlerFunc {
-			return func(c winter.Context) {
-				c.Inject(func(ctx context.Context) context.Context {
-					return context.WithValue(ctx, opt.key, opt)
-				})
-				h(c)
-			}
-		})
+	return wext.WrapInstaller(func(altKeys ...string) {
+		ins := Ext.Instance(altKeys...)
+
+		a.Component(ins.Key()).Middleware(ins.Middleware(o))
+	})
 }
