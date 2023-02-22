@@ -1,18 +1,20 @@
 package wext
 
+import "github.com/guoyk93/winter"
+
 type Installer interface {
-	Install(altKeys ...string)
+	Install(a winter.App, altKeys ...string)
 }
 
 type installer struct {
-	fn func(altKeys ...string)
+	fn func(a winter.App, altKeys ...string)
 }
 
-func (e installer) Install(altKeys ...string) {
-	e.fn(altKeys...)
+func (e installer) Install(a winter.App, altKeys ...string) {
+	e.fn(a, altKeys...)
 }
 
 // WrapInstaller create an [Installer] from function
-func WrapInstaller(fn func(altKeys ...string)) Installer {
+func WrapInstaller(fn func(a winter.App, altKeys ...string)) Installer {
 	return installer{fn: fn}
 }

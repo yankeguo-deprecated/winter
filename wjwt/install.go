@@ -60,9 +60,9 @@ func Sign(ctx context.Context, fn func(b *jwt.Builder) *jwt.Builder, altKeys ...
 }
 
 // Installer install component
-func Installer(a winter.App, opts ...Option) wext.Installer {
+func Installer(opts ...Option) wext.Installer {
 	o := Ext.Options(opts...)
-	return wext.WrapInstaller(func(altKeys ...string) {
+	return wext.WrapInstaller(func(a winter.App, altKeys ...string) {
 		ins := Ext.Instance(altKeys...)
 		a.Component(ins.Key()).Middleware(ins.Middleware(o))
 	})

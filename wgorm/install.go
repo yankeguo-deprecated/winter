@@ -20,10 +20,10 @@ func DB(ctx context.Context, altKeys ...string) *gorm.DB {
 }
 
 // Installer create [wext.Installer]
-func Installer(a winter.App, opts ...Option) wext.Installer {
+func Installer(opts ...Option) wext.Installer {
 	o := Ext.Options(opts...)
 
-	return wext.WrapInstaller(func(altKeys ...string) {
+	return wext.WrapInstaller(func(a winter.App, altKeys ...string) {
 		ins := Ext.Instance(altKeys...)
 
 		inj := &injected{

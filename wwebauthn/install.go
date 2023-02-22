@@ -13,10 +13,10 @@ func Get(ctx context.Context, altKeys ...string) *webauthn.WebAuthn {
 }
 
 // Installer install component
-func Installer(a winter.App, opts ...Option) wext.Installer {
+func Installer(opts ...Option) wext.Installer {
 	o := Ext.Options(opts...)
 
-	return wext.WrapInstaller(func(altKeys ...string) {
+	return wext.WrapInstaller(func(a winter.App, altKeys ...string) {
 		ins := Ext.Instance(altKeys...)
 
 		var w *webauthn.WebAuthn

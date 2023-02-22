@@ -14,10 +14,10 @@ func Get(ctx context.Context, altKeys ...string) jwk.Key {
 }
 
 // Installer install component
-func Installer(a winter.App, opts ...Option) wext.Installer {
+func Installer(opts ...Option) wext.Installer {
 	o := Ext.Options(opts...)
 
-	return wext.WrapInstaller(func(altKeys ...string) {
+	return wext.WrapInstaller(func(a winter.App, altKeys ...string) {
 		ins := Ext.Instance(altKeys...)
 
 		var k jwk.Key
