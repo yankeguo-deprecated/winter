@@ -2,6 +2,7 @@ package wboot
 
 import (
 	"context"
+	"github.com/go-logr/logr"
 	"github.com/guoyk93/rg"
 	"github.com/guoyk93/winter"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
@@ -31,7 +32,7 @@ func Main(fn func() (a winter.App, err error)) {
 	defer rg.Guard(&err)
 
 	otel.SetTracerProvider(sdktrace.NewTracerProvider(
-		sdktrace.WithBatcher(rg.Must(zipkin.New(""))),
+		sdktrace.WithBatcher(rg.Must(zipkin.New("", zipkin.WithLogr(logr.Discard())))),
 	))
 	otel.SetTextMapPropagator(
 		propagation.NewCompositeTextMapPropagator(
