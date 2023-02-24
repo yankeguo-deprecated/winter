@@ -46,13 +46,7 @@ func Installer(opts ...Option) wext.Installer {
 	return wext.WrapInstaller(func(a winter.App, altKeys ...string) {
 		ins := Ext.Instance(altKeys...)
 
-		a.Component(ins.Key()).
-			Check(func(ctx context.Context) (err error) {
-				defer rg.Guard(&err)
-				_ = Next(ctx, altKeys...)
-				return
-			}).
-			Middleware(ins.Middleware(&o))
+		a.Component(ins.Key()).Middleware(ins.Middleware(&o))
 	})
 
 }
