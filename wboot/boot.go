@@ -2,15 +2,8 @@ package wboot
 
 import (
 	"context"
-	"github.com/go-logr/logr"
 	"github.com/guoyk93/rg"
 	"github.com/guoyk93/winter"
-	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
-	"go.opentelemetry.io/contrib/propagators/b3"
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/zipkin"
-	"go.opentelemetry.io/otel/propagation"
-	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"log"
 	"net/http"
 	"os"
@@ -31,22 +24,7 @@ func Main(fn func() (a winter.App, err error)) {
 	}()
 	defer rg.Guard(&err)
 
-	otel.SetTracerProvider(sdktrace.NewTracerProvider(
-		sdktrace.WithBatcher(rg.Must(zipkin.New("", zipkin.WithLogr(logr.Discard())))),
-	))
-	otel.SetTextMapPropagator(
-		propagation.NewCompositeTextMapPropagator(
-			propagation.TraceContext{},
-			propagation.Baggage{},
-			b3.New(b3.WithInjectEncoding(b3.B3MultipleHeader|b3.B3SingleHeader)),
-		),
-	)
-
-	// re-initialize otelhttp.DefaultClient and http.DefaultClient
-	otelhttp.DefaultClient = &http.Client{
-		Transport: otelhttp.NewTransport(http.DefaultTransport),
-	}
-	http.DefaultClient = otelhttp.DefaultClient
+	rg.Must0(setupOTEL())
 
 	ctx := context.Background()
 
