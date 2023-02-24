@@ -11,6 +11,7 @@ require (
 	github.com/prometheus/client_golang v1.14.0
 	github.com/redis/go-redis/v9 v9.0.2
 	github.com/stretchr/testify v1.8.1
+	github.com/uptrace/opentelemetry-go-extra/otelgorm v0.1.21
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.39.0
 	go.opentelemetry.io/contrib/propagators/b3 v1.14.0
 	go.opentelemetry.io/otel v1.13.0
@@ -53,6 +54,7 @@ require (
 	github.com/prometheus/client_model v0.3.0 // indirect
 	github.com/prometheus/common v0.40.0 // indirect
 	github.com/prometheus/procfs v0.9.0 // indirect
+	github.com/uptrace/opentelemetry-go-extra/otelsql v0.1.21 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	go.opentelemetry.io/otel/metric v0.36.0 // indirect
 	go.opentelemetry.io/otel/trace v1.13.0 // indirect

@@ -2,6 +2,7 @@ package wgorm
 
 import (
 	"github.com/guoyk93/winter/wext"
+	"github.com/uptrace/opentelemetry-go-extra/otelgorm"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -10,6 +11,7 @@ type options struct {
 	mysqlDSN    string
 	mysqlConfig *mysql.Config
 	gormOptions []gorm.Option
+	otelOptions []otelgorm.Option
 	debug       bool
 }
 
@@ -40,10 +42,17 @@ func WithMySQLConfig(cfg *mysql.Config) Option {
 	}
 }
 
-// WithGORMOption add [gorm.Option]
-func WithGORMOption(o gorm.Option) Option {
+// WithGORMOptions add [gorm.Option]
+func WithGORMOptions(os ...gorm.Option) Option {
 	return func(opts *options) {
-		opts.gormOptions = append(opts.gormOptions, o)
+		opts.gormOptions = append(opts.gormOptions, os...)
+	}
+}
+
+// WithOTELOptions add [otelgorm.Option]
+func WithOTELOptions(os ...otelgorm.Option) Option {
+	return func(opts *options) {
+		opts.otelOptions = append(opts.otelOptions, os...)
 	}
 }
 

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/guoyk93/winter"
 	"github.com/guoyk93/winter/wext"
+	"github.com/uptrace/opentelemetry-go-extra/otelgorm"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -34,12 +35,14 @@ func Installer(opts ...Option) wext.Installer {
 			Startup(func(ctx context.Context) (err error) {
 				if o.mysqlConfig != nil {
 					inj.db, err = gorm.Open(mysql.New(*o.mysqlConfig), o.gormOptions...)
-					return
 				} else if o.mysqlDSN != "" {
 					inj.db, err = gorm.Open(mysql.Open(o.mysqlDSN), o.gormOptions...)
-					return
 				} else {
 					err = errors.New("failed to initialize gorm component")
+					return
+				}
+				if err = inj.db.Use(otelgorm.NewPlugin(o.otelOptions...)); err != nil {
+					return
 				}
 				return
 			}).
