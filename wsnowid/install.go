@@ -9,6 +9,10 @@ import (
 	"strconv"
 )
 
+var (
+	ext = wext.Simple[options]("snowid")
+)
+
 // Next return a new id
 func Next(ctx context.Context, altKeys ...string) string {
 	return NextN(ctx, 1, altKeys...)[0]
@@ -20,7 +24,7 @@ func NextN(ctx context.Context, size int, altKeys ...string) []string {
 		winter.HaltString("wsnowid: invalid argument: size", winter.HaltWithBadRequest())
 	}
 
-	o := Ext.Instance(altKeys...).Get(ctx)
+	o := ext.Instance(altKeys...).Get(ctx)
 
 	var ret []string
 	res := rg.Must(
@@ -41,12 +45,5 @@ func NextN(ctx context.Context, size int, altKeys ...string) []string {
 
 // Installer install component
 func Installer(opts ...Option) wext.Installer {
-	o := Ext.Options(opts...)
-
-	return wext.WrapInstaller(func(a winter.App, altKeys ...string) {
-		ins := Ext.Instance(altKeys...)
-
-		a.Component(ins.Key()).Middleware(ins.Middleware(&o))
-	})
-
+	return ext.Installer(opts...)
 }

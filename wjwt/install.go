@@ -13,9 +13,16 @@ import (
 	"time"
 )
 
+var (
+	ext = wext.Simple[options]("jwt").
+		Default(func(opt *options) {
+			opt.payloadHeader = "X-JWT-Payload"
+		})
+)
+
 // Get get JWT Payload from Istio RequestAuthentication header
 func Get(c winter.Context, altKeys ...string) jwt.Token {
-	o := Ext.Instance(altKeys...).Get(c)
+	o := ext.Instance(altKeys...).Get(c)
 
 	var pl string
 
@@ -51,7 +58,7 @@ func Get(c winter.Context, altKeys ...string) jwt.Token {
 
 // Sign create a signed JWT
 func Sign(ctx context.Context, fn func(b *jwt.Builder) *jwt.Builder, altKeys ...string) string {
-	o := Ext.Instance(altKeys...).Get(ctx)
+	o := ext.Instance(altKeys...).Get(ctx)
 	k := wjwk.Get(ctx, o.jwkKeys...)
 	b := fn(jwt.NewBuilder().Issuer(o.issuer).IssuedAt(time.Now()))
 	t := rg.Must(b.Build())
@@ -61,9 +68,5 @@ func Sign(ctx context.Context, fn func(b *jwt.Builder) *jwt.Builder, altKeys ...
 
 // Installer install component
 func Installer(opts ...Option) wext.Installer {
-	o := Ext.Options(opts...)
-	return wext.WrapInstaller(func(a winter.App, altKeys ...string) {
-		ins := Ext.Instance(altKeys...)
-		a.Component(ins.Key()).Middleware(ins.Middleware(&o))
-	})
+	return ext.Installer(opts...)
 }

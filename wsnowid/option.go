@@ -1,7 +1,5 @@
 package wsnowid
 
-import "github.com/guoyk93/winter/wext"
-
 type options struct {
 	url       string
 	restyKeys []string
@@ -9,10 +7,6 @@ type options struct {
 
 // Option option for installation
 type Option = func(opts *options)
-
-var Ext = wext.New[options, *options]("snowid", func() *options {
-	return &options{}
-})
 
 // WithRestyKey set [wresty.KeyType]
 func WithRestyKey(k ...string) Option {

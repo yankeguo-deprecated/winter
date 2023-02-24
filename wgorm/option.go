@@ -1,7 +1,6 @@
 package wgorm
 
 import (
-	"github.com/guoyk93/winter/wext"
 	"github.com/uptrace/opentelemetry-go-extra/otelgorm"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -22,11 +21,6 @@ type injected struct {
 
 // Option option for installation
 type Option = func(opts *options)
-
-// Ext the [wext.Extension]
-var Ext = wext.New[options, *injected]("gorm", func() *options {
-	return &options{}
-})
 
 // WithMySQLDSN set MySQL DSN
 func WithMySQLDSN(k string) Option {

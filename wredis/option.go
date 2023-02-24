@@ -1,7 +1,6 @@
 package wredis
 
 import (
-	"github.com/guoyk93/winter/wext"
 	"github.com/redis/go-redis/extra/redisotel/v9"
 	"github.com/redis/go-redis/v9"
 )
@@ -11,10 +10,6 @@ type options struct {
 	url         string
 	tracingOpts []redisotel.TracingOption
 }
-
-var Ext = wext.New[options, *redis.Client]("redis", func() *options {
-	return &options{}
-})
 
 // Option option for installation
 type Option = func(opts *options)

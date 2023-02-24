@@ -1,7 +1,5 @@
 package wjwt
 
-import "github.com/guoyk93/winter/wext"
-
 type options struct {
 	jwkKeys       []string
 	payloadHeader string
@@ -11,12 +9,6 @@ type options struct {
 
 // Option option for installation
 type Option = func(opts *options)
-
-var Ext = wext.New[options, *options]("jwt", func() *options {
-	return &options{
-		payloadHeader: "X-JWT-Payload",
-	}
-})
 
 // WithJWKKey set key for JWK
 func WithJWKKey(s ...string) Option {

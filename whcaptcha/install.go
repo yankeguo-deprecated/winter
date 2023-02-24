@@ -10,12 +10,16 @@ import (
 )
 
 var (
+	ext = wext.Simple[options]("hcaptcha")
+)
+
+var (
 	ErrInvalidToken = errors.New("hcaptcha: invalid token")
 )
 
 // Validate validate hcaptcha
 func Validate(c winter.Context, token string, altKeys ...string) {
-	o := Ext.Instance(altKeys...).Get(c)
+	o := ext.Instance(altKeys...).Get(c)
 
 	var ret struct {
 		Success bool `json:"success"`
@@ -37,11 +41,5 @@ func Validate(c winter.Context, token string, altKeys ...string) {
 
 // Installer install component
 func Installer(opts ...Option) wext.Installer {
-	o := Ext.Options(opts...)
-
-	return wext.WrapInstaller(func(a winter.App, altKeys ...string) {
-		ins := Ext.Instance(altKeys...)
-
-		a.Component(ins.Key()).Middleware(ins.Middleware(&o))
-	})
+	return ext.Installer(opts...)
 }
