@@ -33,6 +33,7 @@ func Installer(opts ...Option) wext.Installer {
 
 		a.Component(ins.Key()).
 			Startup(func(ctx context.Context) (err error) {
+				// create db
 				if o.mysqlConfig != nil {
 					inj.db, err = gorm.Open(mysql.New(*o.mysqlConfig), o.gormOptions...)
 				} else if o.mysqlDSN != "" {
@@ -41,7 +42,8 @@ func Installer(opts ...Option) wext.Installer {
 					err = errors.New("failed to initialize gorm component")
 					return
 				}
-				if err = inj.db.Use(otelgorm.NewPlugin(o.otelOptions...)); err != nil {
+				// instrument
+				if err = inj.db.Use(otelgorm.NewPlugin(o.tracingOpts...)); err != nil {
 					return
 				}
 				return

@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/guoyk93/winter"
 	"github.com/guoyk93/winter/wext"
+	"github.com/redis/go-redis/extra/redisotel/v9"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -23,6 +24,7 @@ func Installer(opts ...Option) wext.Installer {
 
 		a.Component(ins.Key()).
 			Startup(func(ctx context.Context) (err error) {
+				// create options
 				rOpts := &redis.Options{}
 				if o.opts != nil {
 					rOpts = o.opts
@@ -31,7 +33,12 @@ func Installer(opts ...Option) wext.Installer {
 						return
 					}
 				}
+				// create client
 				r = redis.NewClient(rOpts)
+				// instrument
+				if err = redisotel.InstrumentTracing(r, o.tracingOpts...); err != nil {
+					return
+				}
 				return
 			}).
 			Check(func(ctx context.Context) error {

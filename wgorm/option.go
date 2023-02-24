@@ -11,7 +11,7 @@ type options struct {
 	mysqlDSN    string
 	mysqlConfig *mysql.Config
 	gormOptions []gorm.Option
-	otelOptions []otelgorm.Option
+	tracingOpts []otelgorm.Option
 	debug       bool
 }
 
@@ -49,10 +49,10 @@ func WithGORMOptions(os ...gorm.Option) Option {
 	}
 }
 
-// WithOTELOptions add [otelgorm.Option]
-func WithOTELOptions(os ...otelgorm.Option) Option {
+// WithTracingOptions add [otelgorm.Option]
+func WithTracingOptions(os ...otelgorm.Option) Option {
 	return func(opts *options) {
-		opts.otelOptions = append(opts.otelOptions, os...)
+		opts.tracingOpts = append(opts.tracingOpts, os...)
 	}
 }
 
