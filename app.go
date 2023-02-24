@@ -31,9 +31,8 @@ type app struct {
 
 	opts options
 
-	mux *http.ServeMux
+	hMain *http.ServeMux
 
-	hMain http.Handler
 	hProm http.Handler
 	hProf http.Handler
 
@@ -43,17 +42,20 @@ type app struct {
 }
 
 func (a *app) HandleFunc(pattern string, fn HandlerFunc) {
-	a.mux.Handle(
+	a.hMain.Handle(
 		pattern,
-		otelhttp.WithRouteTag(
+		otelhttp.NewHandler(
+			otelhttp.WithRouteTag(
+				pattern,
+				http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+					c := newContext(rw, req)
+					func() {
+						defer c.Perform()
+						a.Wrap(fn)(c)
+					}()
+				}),
+			),
 			pattern,
-			http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
-				c := newContext(rw, req)
-				func() {
-					defer c.Perform()
-					a.Wrap(fn)(c)
-				}()
-			}),
 		),
 	)
 }
@@ -145,17 +147,17 @@ func New(opts ...Option) App {
 
 	a.Registry = NewRegistry()
 
-	a.mux = &http.ServeMux{}
-
-	a.hMain = otelhttp.NewHandler(a.mux, "http")
-	a.hProm = promhttp.Handler()
-	m := &http.ServeMux{}
-	m.HandleFunc("/debug/pprof/", pprof.Index)
-	m.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
-	m.HandleFunc("/debug/pprof/profile", pprof.Profile)
-	m.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
-	m.HandleFunc("/debug/pprof/trace", pprof.Trace)
-	a.hProf = m
+	{
+		a.hMain = &http.ServeMux{}
+		a.hProm = promhttp.Handler()
+		m := &http.ServeMux{}
+		m.HandleFunc("/debug/pprof/", pprof.Index)
+		m.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
+		m.HandleFunc("/debug/pprof/profile", pprof.Profile)
+		m.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+		m.HandleFunc("/debug/pprof/trace", pprof.Trace)
+		a.hProf = m
+	}
 
 	// create concurrency controller
 	if a.opts.concurrency > 0 {
