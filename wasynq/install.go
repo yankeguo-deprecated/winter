@@ -2,6 +2,7 @@ package wasynq
 
 import (
 	"context"
+	"errors"
 	"github.com/guoyk93/winter"
 	"github.com/guoyk93/winter/wext"
 	"github.com/hibiken/asynq"
@@ -10,7 +11,10 @@ import (
 var (
 	ext = wext.New[options, *asynq.Client]("asynq").
 		Startup(func(ctx context.Context, opt *options) (inj *asynq.Client, err error) {
-			if opt.redisURL != "" {
+			if opt.redisOpt != nil {
+				inj = asynq.NewClient(*opt.redisOpt)
+				return
+			} else if opt.redisURL != "" {
 				var ao asynq.RedisConnOpt
 				if ao, err = asynq.ParseRedisURI(opt.redisURL); err != nil {
 					return
@@ -18,7 +22,7 @@ var (
 				inj = asynq.NewClient(ao)
 				return
 			} else {
-				inj = asynq.NewClient(opt.redisOpt)
+				err = errors.New("missing asynq options")
 				return
 			}
 		}).

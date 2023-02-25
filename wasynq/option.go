@@ -4,7 +4,7 @@ import "github.com/hibiken/asynq"
 
 type options struct {
 	redisURL string
-	redisOpt asynq.RedisConnOpt
+	redisOpt *asynq.RedisConnOpt
 }
 
 type Option = func(opts *options)
@@ -15,7 +15,7 @@ func WithRedisURL(s string) Option {
 	}
 }
 
-func WithRedisOpt(o asynq.RedisConnOpt) Option {
+func WithRedisOpt(o *asynq.RedisConnOpt) Option {
 	return func(opts *options) {
 		opts.redisOpt = o
 	}
