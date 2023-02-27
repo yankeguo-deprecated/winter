@@ -2,6 +2,9 @@ package wwx
 
 import (
 	"context"
+	"encoding/xml"
+	"github.com/guoyk93/winter"
+	"time"
 )
 
 const (
@@ -23,6 +26,8 @@ const (
 )
 
 type Request struct {
+	XMLName xml.Name `xml:"xml"`
+
 	ToUserName   string `xml:"ToUserName"`
 	FromUserName string `xml:"FromUserName"`
 	CreateTime   int64  `xml:"CreateTime"`
@@ -69,12 +74,16 @@ type Request struct {
 	Precision float64 `xml:"Precision"`
 }
 
-type TextResponse struct {
-	ToUserName   string `xml:"ToUserName,cdata"`
-	FromUserName string `xml:"FromUserName,cdata"`
-	CreateTime   int64  `xml:"CreateTime"`
-	MsgType      string `xml:"MsgType,cdata"`
-	Content      string `xml:"Content,cdata,omitempty"`
+type Response struct {
+	XMLName xml.Name `xml:"xml"`
+
+	ToUserName   CDATA `xml:"ToUserName"`
+	FromUserName CDATA `xml:"FromUserName"`
+	CreateTime   int64 `xml:"CreateTime"`
+	MsgType      CDATA `xml:"MsgType"`
+	Content      CDATA `xml:"Content,omitempty"`
+
+	Empty bool `xml:"-"`
 }
 
 // Context WeChat handling context
@@ -84,12 +93,48 @@ type Context interface {
 	// Req returns the decoded request
 	Req() Request
 
-	// AppID returns the appid
-	AppID() string
+	// Res returns the response
+	Res() *Response
 
-	// Empty respond with empty
-	Empty() string
+	// Text send text response
+	Text(s string)
 
-	// Text respond with text
-	Text(s string) string
+	// Empty send empty response
+	Empty()
+}
+
+type wxContext struct {
+	c   winter.Context
+	req Request
+	res *Response
+}
+
+func (w wxContext) Deadline() (deadline time.Time, ok bool) {
+	return w.c.Deadline()
+}
+
+func (w wxContext) Done() <-chan struct{} {
+	return w.c.Done()
+}
+
+func (w wxContext) Err() error {
+	return w.c.Err()
+}
+
+func (w wxContext) Value(key any) any {
+	return w.c.Value(key)
+}
+
+func (w wxContext) Req() Request {
+	return w.req
+}
+
+func (w wxContext) Res() *Response {
+	return w.res
+}
+
+func (w wxContext) Text(s string) {
+}
+
+func (w wxContext) Empty() {
 }
