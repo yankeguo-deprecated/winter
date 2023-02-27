@@ -58,6 +58,8 @@ func Main(fn func() (a winter.App, err error)) {
 	}()
 	defer rg.Guard(&err)
 
+	log.SetOutput(os.Stdout)
+
 	rg.Must0(setupOTEL())
 
 	ctx := context.Background()

@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/guoyk93/rg"
+	"go.opentelemetry.io/otel/trace"
+	"log"
 	"net/http"
 	"strconv"
 	"sync"
@@ -162,8 +164,13 @@ func (c *winterContext) Perform() {
 		if e, ok = r.(error); !ok {
 			e = fmt.Errorf("panic: %v", r)
 		}
+		var traceID string
+		if sp := trace.SpanFromContext(c); sp != nil {
+			traceID = sp.SpanContext().TraceID().String()
+		}
 		c.Code(StatusCodeFromError(e))
 		c.JSON(JSONBodyFromError(e))
+		log.Printf("trace_id=%s, code=%d, message=%s", traceID, c.code, string(c.body))
 	}
 	c.sendOnce.Do(c.send)
 }
