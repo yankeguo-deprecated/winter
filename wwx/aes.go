@@ -21,7 +21,7 @@ import (
 
 type EncryptedRequest struct {
 	Signature    string `json:"signature"`
-	Timestamp    string `json:"timestamp,string"`
+	Timestamp    string `json:"timestamp"`
 	Nonce        string `json:"nonce"`
 	OpenID       string `json:"openid"`
 	EncryptType  string `json:"encrypt_type"`

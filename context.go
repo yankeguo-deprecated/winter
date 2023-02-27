@@ -170,7 +170,7 @@ func (c *winterContext) Perform() {
 		}
 		c.Code(StatusCodeFromError(e))
 		c.JSON(JSONBodyFromError(e))
-		log.Printf("trace_id=%s, code=%d, message=%s", traceID, c.code, string(c.body))
+		log.Printf("trace_id=%s, code=%d; %s", traceID, c.code, string(c.body))
 	}
 	c.sendOnce.Do(c.send)
 }
