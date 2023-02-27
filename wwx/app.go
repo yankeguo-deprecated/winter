@@ -48,8 +48,8 @@ func (a *app) handleIncoming(c winter.Context) {
 		if h == nil {
 			h = a.opt.evtHandlers[""]
 		}
-	} else {
-		h = a.opt.msgHandlers[req.Event]
+	} else if a.opt.msgHandlers != nil {
+		h = a.opt.msgHandlers[req.MsgType]
 		if h == nil {
 			h = a.opt.msgHandlers[""]
 		}
