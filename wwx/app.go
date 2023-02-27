@@ -32,9 +32,10 @@ func (a *app) handleIncoming(c winter.Context) {
 	encReq := winter.Bind[EncryptedRequest](c)
 
 	buf := rg.Must(DecryptAES(encReq, DecryptAESOptions{
-		Token:  a.opt.token,
-		AESKey: a.opt.aesKey,
-		AppID:  a.opt.appID,
+		Token:          a.opt.token,
+		AESKey:         a.opt.aesKey,
+		AppID:          a.opt.appID,
+		SkipValidation: a.opt.skipValidation,
 	}))
 
 	var req Request

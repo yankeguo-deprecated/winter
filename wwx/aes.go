@@ -42,9 +42,10 @@ type EncryptedResponse struct {
 }
 
 type DecryptAESOptions struct {
-	Token  string
-	AESKey string
-	AppID  string
+	Token          string
+	AESKey         string
+	AppID          string
+	SkipValidation bool
 }
 
 type EncryptAESOptions struct {
@@ -108,6 +109,11 @@ func DecryptAES(req EncryptedRequest, opts DecryptAESOptions) (buf []byte, err e
 	rg.Must0(xml.Unmarshal(req.Body, &data))
 
 	// validate signature
+	if opts.SkipValidation {
+		goto doneValidation
+	}
+
+	// validation
 	{
 		// validate encrypt_type
 		if req.EncryptType != encryptTypeAES {
@@ -135,6 +141,8 @@ func DecryptAES(req EncryptedRequest, opts DecryptAESOptions) (buf []byte, err e
 			return
 		}
 	}
+
+doneValidation:
 
 	// decode base64
 	{

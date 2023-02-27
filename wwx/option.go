@@ -10,6 +10,8 @@ type options struct {
 	redisKey    []string
 	msgHandlers map[string]HandlerFunc
 	evtHandlers map[string]HandlerFunc
+
+	skipValidation bool
 }
 
 type Option = func(opts *options)
@@ -18,6 +20,13 @@ type Option = func(opts *options)
 func WithRedisKey(altKeys ...string) Option {
 	return func(opts *options) {
 		opts.redisKey = altKeys
+	}
+}
+
+// SkipValidation set skipValidation
+func SkipValidation(s bool) Option {
+	return func(opts *options) {
+		opts.skipValidation = s
 	}
 }
 
