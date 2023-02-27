@@ -36,9 +36,11 @@ type EncryptedRequestData struct {
 }
 
 type EncryptedResponse struct {
-	XMLName    xml.Name `xml:"xml"`
-	ToUserName CDATA    `xml:"ToUserName"`
-	Encrypt    CDATA    `xml:"Encrypt"`
+	XMLName      xml.Name `xml:"xml"`
+	Encrypt      CDATA    `xml:"Encrypt"`
+	MsgSignature CDATA    `xml:"MsgSignature"`
+	Timestamp    string   `xml:"Timestamp"`
+	Nonce        CDATA    `xml:"Nonce"`
 }
 
 type DecryptAESOptions struct {
@@ -49,10 +51,11 @@ type DecryptAESOptions struct {
 }
 
 type EncryptAESOptions struct {
-	Token      string
-	AESKey     string
-	AppID      string
-	ToUserName string
+	Token     string
+	AESKey    string
+	AppID     string
+	Nonce     string
+	Timestamp string
 }
 
 func EncryptAES(buf []byte, opts EncryptAESOptions) (res EncryptedResponse, err error) {
@@ -87,10 +90,23 @@ func EncryptAES(buf []byte, opts EncryptAESOptions) (res EncryptedResponse, err 
 		enc.CryptBlocks(buf, buf)
 	}
 
-	// assign values
+	// create signature
 	{
-		res.ToUserName.Value = opts.ToUserName
 		res.Encrypt.Value = base64.StdEncoding.EncodeToString(buf)
+		res.Timestamp = opts.Timestamp
+		res.Nonce.Value = opts.Nonce
+
+		components := []string{
+			res.Encrypt.Value,
+			res.Timestamp,
+			res.Nonce.Value,
+			opts.Token,
+		}
+		sort.Strings(components)
+
+		h := sha1.New()
+		h.Write([]byte(strings.Join(components, "")))
+		res.MsgSignature.Value = hex.EncodeToString(h.Sum(nil))
 	}
 
 	return

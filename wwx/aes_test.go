@@ -1,17 +1,10 @@
 package wwx
 
 import (
-	"crypto/rand"
-	"crypto/sha1"
-	"encoding/hex"
 	"encoding/xml"
 	"github.com/guoyk93/rg"
 	"github.com/stretchr/testify/require"
-	"sort"
-	"strconv"
-	"strings"
 	"testing"
-	"time"
 )
 
 func TestEncryptAES(t *testing.T) {
@@ -25,40 +18,23 @@ func TestEncryptAES(t *testing.T) {
 
 	out, err := EncryptAES(raw,
 		EncryptAESOptions{
-			Token:      "fd8H8SOsDI6YS2b",
-			AESKey:     "fd8H8SOsDI6YS2bYhG6DEFMdmk2mcdEq8kauDUuUajH",
-			AppID:      "wxd044d4b039b49604",
-			ToUserName: "oGnmQ5ixCo0JKJqAunh6i1Yj4yMA",
+			Token:     "fd8H8SOsDI6YS2b",
+			AESKey:    "fd8H8SOsDI6YS2bYhG6DEFMdmk2mcdEq8kauDUuUajH",
+			AppID:     "wxd044d4b039b49604",
+			Nonce:     "1713665194",
+			Timestamp: "1677472749",
 		},
 	)
 	require.NoError(t, err)
 
-	buf := make([]byte, 10, 10)
-	rand.Read(buf)
-
-	nonce := hex.EncodeToString(buf)
-	ts := strconv.FormatInt(time.Now().Unix(), 10)
-
-	comps := []string{
-		"fd8H8SOsDI6YS2b",
-		out.Encrypt.Value,
-		nonce, ts,
-	}
-	sort.Strings(comps)
-	tos := strings.Join(comps, "")
-
-	h := sha1.New()
-	h.Write([]byte(tos))
-	sig := hex.EncodeToString(h.Sum(nil))
-
 	dout, err := DecryptAES(
 		EncryptedRequest{
 			Signature:    "",
-			Timestamp:    ts,
-			Nonce:        nonce,
+			Timestamp:    out.Timestamp,
+			Nonce:        out.Nonce.Value,
 			OpenID:       "oGnmQ5ixCo0JKJqAunh6i1Yj4yMA",
 			EncryptType:  "aes",
-			MsgSignature: sig,
+			MsgSignature: out.MsgSignature.Value,
 			Body:         rg.Must(xml.Marshal(out)),
 		},
 		DecryptAESOptions{

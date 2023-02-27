@@ -77,10 +77,11 @@ func (a *app) handleIncoming(c winter.Context) {
 	encRes := rg.Must(EncryptAES(
 		rg.Must(xml.Marshal(res)),
 		EncryptAESOptions{
-			Token:      a.opt.token,
-			AESKey:     a.opt.aesKey,
-			AppID:      a.opt.appID,
-			ToUserName: req.FromUserName,
+			Token:     a.opt.token,
+			AESKey:    a.opt.aesKey,
+			AppID:     a.opt.appID,
+			Nonce:     encReq.Nonce,
+			Timestamp: encReq.Timestamp,
 		},
 	))
 
