@@ -87,7 +87,7 @@ func (a *app) handleIncoming(c winter.Context) {
 	c.Body("application/xml", rg.Must(xml.Marshal(encRes)))
 }
 
-func (a *app) HandleCallback(c winter.Context) {
+func (a *app) Handle(c winter.Context) {
 	if c.Req().Method == "GET" {
 		a.handleValidation(c)
 	} else if c.Req().Method == "POST" {

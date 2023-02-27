@@ -16,8 +16,10 @@ var (
 		})
 )
 
-func HandleCallback(c winter.Context, altKeys ...string) {
-	ext.Instance(altKeys...).Get(c).HandleCallback(c)
+func Handler(altKeys ...string) winter.HandlerFunc {
+	return func(c winter.Context) {
+		ext.Instance(altKeys...).Get(c).Handle(c)
+	}
 }
 
 func Installer(opts ...Option) wext.Installer {
