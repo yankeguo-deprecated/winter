@@ -134,7 +134,10 @@ func (w wxContext) Res() *Response {
 }
 
 func (w wxContext) Text(s string) {
+	w.res.MsgType.Value = TypeText
+	w.res.Content.Value = s
 }
 
 func (w wxContext) Empty() {
+	w.res.Empty = true
 }
