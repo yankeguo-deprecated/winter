@@ -49,6 +49,7 @@ func (a *app) HandleFunc(pattern string, fn HandlerFunc) {
 				pattern,
 				http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 					c := newContext(rw, req)
+					c.responseLogging = a.opts.responseLogging
 					func() {
 						defer c.Perform()
 						a.Wrap(fn)(c)

@@ -6,6 +6,7 @@ type options struct {
 	readinessPath    string
 	livenessPath     string
 	metricsPath      string
+	responseLogging  bool
 }
 
 // Option a function configuring [App]
@@ -49,5 +50,12 @@ func WithLivenessPath(s string) Option {
 func WithMetricsPath(s string) Option {
 	return func(opts *options) {
 		opts.metricsPath = s
+	}
+}
+
+// SetResponseLogging set responseLogging
+func SetResponseLogging(d bool) Option {
+	return func(opts *options) {
+		opts.responseLogging = d
 	}
 }

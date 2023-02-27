@@ -83,6 +83,8 @@ type winterContext struct {
 
 	recvOnce *sync.Once
 	sendOnce *sync.Once
+
+	responseLogging bool
 }
 
 func (c *winterContext) Deadline() (deadline time.Time, ok bool) {
@@ -126,6 +128,13 @@ func (c *winterContext) receive() {
 }
 
 func (c *winterContext) send() {
+	if c.responseLogging {
+		var traceID string
+		if sp := trace.SpanFromContext(c); sp != nil {
+			traceID = sp.SpanContext().TraceID().String()
+		}
+		log.Printf("trace_id=%s, code=%d; %s", traceID, c.code, string(c.body))
+	}
 	c.rw.WriteHeader(c.code)
 	_, _ = c.rw.Write(c.body)
 }
@@ -164,18 +173,14 @@ func (c *winterContext) Perform() {
 		if e, ok = r.(error); !ok {
 			e = fmt.Errorf("panic: %v", r)
 		}
-		var traceID string
-		if sp := trace.SpanFromContext(c); sp != nil {
-			traceID = sp.SpanContext().TraceID().String()
-		}
 		c.Code(StatusCodeFromError(e))
 		c.JSON(JSONBodyFromError(e))
-		log.Printf("trace_id=%s, code=%d; %s", traceID, c.code, string(c.body))
+		c.responseLogging = true
 	}
 	c.sendOnce.Do(c.send)
 }
 
-func newContext(rw http.ResponseWriter, req *http.Request) Context {
+func newContext(rw http.ResponseWriter, req *http.Request) *winterContext {
 	return &winterContext{
 		req:      req,
 		rw:       rw,
