@@ -20,6 +20,6 @@ func HandleCallback(c winter.Context, altKeys ...string) {
 	ext.Instance(altKeys...).Get(c).HandleCallback(c)
 }
 
-func Installer(a winter.App, opts ...Option) wext.Installer {
+func Installer(opts ...Option) wext.Installer {
 	return ext.Installer(opts...)
 }
