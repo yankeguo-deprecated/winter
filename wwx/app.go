@@ -2,6 +2,7 @@ package wwx
 
 import (
 	"github.com/guoyk93/winter"
+	"log"
 	"net/http"
 )
 
@@ -21,6 +22,10 @@ func (a *app) handleValidation(c winter.Context) {
 }
 
 func (a *app) handleIncoming(c winter.Context) {
+	req := winter.Bind[map[string]any](c)
+
+	log.Println(req)
+
 	c.Text("success")
 }
 

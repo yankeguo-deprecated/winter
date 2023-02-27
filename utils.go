@@ -2,7 +2,6 @@ package winter
 
 import (
 	"encoding/json"
-	"errors"
 	"io"
 	"mime"
 	"net/http"
@@ -80,7 +79,7 @@ func extractRequest(m map[string]any, req *http.Request) (err error) {
 
 	switch contentType {
 	case ContentTypeTextPlain:
-		m["text"] = string(buf)
+		m["body"] = string(buf)
 	case ContentTypeApplicationJSON:
 		var j map[string]any
 		if err = json.Unmarshal(buf, &j); err != nil {
@@ -98,7 +97,7 @@ func extractRequest(m map[string]any, req *http.Request) (err error) {
 			m[k] = flattenSingleSlice(vs)
 		}
 	default:
-		err = errors.New("unsupported request body type")
+		m["body"] = buf
 		return
 	}
 
