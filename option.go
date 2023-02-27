@@ -53,8 +53,8 @@ func WithMetricsPath(s string) Option {
 	}
 }
 
-// SetResponseLogging set responseLogging
-func SetResponseLogging(d bool) Option {
+// WithResponseLogging set responseLogging
+func WithResponseLogging(d bool) Option {
 	return func(opts *options) {
 		opts.responseLogging = d
 	}
