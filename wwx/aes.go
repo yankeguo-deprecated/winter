@@ -39,7 +39,7 @@ type EncryptedResponse struct {
 	XMLName      xml.Name `xml:"xml"`
 	Encrypt      CDATA    `xml:"Encrypt"`
 	MsgSignature CDATA    `xml:"MsgSignature"`
-	Timestamp    string   `xml:"Timestamp"`
+	Timestamp    string   `xml:"TimeStamp"`
 	Nonce        CDATA    `xml:"Nonce"`
 }
 
