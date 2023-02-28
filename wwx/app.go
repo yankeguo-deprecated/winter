@@ -65,7 +65,12 @@ func (a *app) handleIncoming(c winter.Context) {
 	res.FromUserName.Value = req.ToUserName
 	res.CreateTime = time.Now().Unix()
 
-	wc := &wxContext{c: c, req: req, res: res}
+	wc := &wxContext{
+		c:     c,
+		appID: a.opt.appID,
+		req:   req,
+		res:   res,
+	}
 
 	h(wc)
 

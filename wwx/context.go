@@ -90,6 +90,9 @@ type Response struct {
 type Context interface {
 	context.Context
 
+	// AppID returns the app_id
+	AppID() string
+
 	// Req returns the decoded request
 	Req() Request
 
@@ -104,40 +107,45 @@ type Context interface {
 }
 
 type wxContext struct {
-	c   winter.Context
-	req Request
-	res *Response
+	c     winter.Context
+	appID string
+	req   Request
+	res   *Response
 }
 
-func (w wxContext) Deadline() (deadline time.Time, ok bool) {
+func (w *wxContext) Deadline() (deadline time.Time, ok bool) {
 	return w.c.Deadline()
 }
 
-func (w wxContext) Done() <-chan struct{} {
+func (w *wxContext) Done() <-chan struct{} {
 	return w.c.Done()
 }
 
-func (w wxContext) Err() error {
+func (w *wxContext) Err() error {
 	return w.c.Err()
 }
 
-func (w wxContext) Value(key any) any {
+func (w *wxContext) Value(key any) any {
 	return w.c.Value(key)
 }
 
-func (w wxContext) Req() Request {
+func (w *wxContext) AppID() string {
+	return w.appID
+}
+
+func (w *wxContext) Req() Request {
 	return w.req
 }
 
-func (w wxContext) Res() *Response {
+func (w *wxContext) Res() *Response {
 	return w.res
 }
 
-func (w wxContext) Text(s string) {
+func (w *wxContext) Text(s string) {
 	w.res.MsgType.Value = TypeText
 	w.res.Content.Value = s
 }
 
-func (w wxContext) Empty() {
+func (w *wxContext) Empty() {
 	w.res.Empty = true
 }
