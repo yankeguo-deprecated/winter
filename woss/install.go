@@ -27,3 +27,7 @@ func Client(ctx context.Context, altKeys ...string) *oss.Client {
 func Bucket(ctx context.Context, altKeys ...string) *oss.Bucket {
 	return ext.Instance(altKeys...).Get(ctx).bucket
 }
+
+func Installer(opts ...Option) wext.Installer {
+	return ext.Installer(opts...)
+}
