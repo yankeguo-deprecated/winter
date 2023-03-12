@@ -3,6 +3,7 @@ module github.com/guoyk93/winter
 go 1.19
 
 require (
+	github.com/aliyun/aliyun-oss-go-sdk v2.2.6+incompatible
 	github.com/go-logr/logr v1.2.3
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/go-webauthn/webauthn v0.8.1
@@ -25,7 +26,6 @@ require (
 )
 
 require (
-	github.com/aliyun/aliyun-oss-go-sdk v2.2.6+incompatible // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
