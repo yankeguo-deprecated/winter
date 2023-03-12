@@ -7,6 +7,7 @@ import (
 	"github.com/guoyk93/rg"
 	"go.opentelemetry.io/otel/trace"
 	"log"
+	"mime/multipart"
 	"net/http"
 	"strconv"
 	"sync"
@@ -55,6 +56,9 @@ type Context interface {
 	// both JSON and Form are supported
 	Bind(data interface{})
 
+	// Files returns the multipart file headers
+	Files() map[string][]*multipart.FileHeader
+
 	// Code set the response code, can be called multiple times
 	Code(code int)
 
@@ -76,7 +80,8 @@ type winterContext struct {
 	req *http.Request
 	rw  http.ResponseWriter
 
-	buf []byte
+	buf   []byte
+	files map[string][]*multipart.FileHeader
 
 	code int
 	body []byte
@@ -121,10 +126,12 @@ func (c *winterContext) Header() http.Header {
 
 func (c *winterContext) receive() {
 	var m = map[string]any{}
-	if err := extractRequest(m, c.req); err != nil {
+	var f = map[string][]*multipart.FileHeader{}
+	if err := extractRequest(m, f, c.req); err != nil {
 		Halt(err, HaltWithStatusCode(http.StatusBadRequest))
 	}
 	c.buf = rg.Must(json.Marshal(m))
+	c.files = f
 }
 
 func (c *winterContext) send() {
@@ -142,6 +149,11 @@ func (c *winterContext) send() {
 func (c *winterContext) Bind(data interface{}) {
 	c.recvOnce.Do(c.receive)
 	rg.Must0(json.Unmarshal(c.buf, data))
+}
+
+func (c *winterContext) Files() map[string][]*multipart.FileHeader {
+	c.recvOnce.Do(c.receive)
+	return c.files
 }
 
 func (c *winterContext) Code(code int) {

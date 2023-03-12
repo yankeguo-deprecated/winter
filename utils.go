@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	"mime"
+	"mime/multipart"
 	"net/http"
 	"net/url"
 	"strings"
@@ -48,7 +49,7 @@ func flattenSingleSlice[T any](s []T) any {
 	return s
 }
 
-func extractRequest(m map[string]any, req *http.Request) (err error) {
+func extractRequest(m map[string]any, f map[string][]*multipart.FileHeader, req *http.Request) (err error) {
 	// header
 	for k, vs := range req.Header {
 		k = "header_" + strings.ToLower(strings.ReplaceAll(k, "-", "_"))
@@ -95,6 +96,16 @@ func extractRequest(m map[string]any, req *http.Request) (err error) {
 		}
 		for k, vs := range q {
 			m[k] = flattenSingleSlice(vs)
+		}
+	case ContentTypeMultipart:
+		if err = req.ParseMultipartForm(1024 * 1024 * 10); err != nil {
+			return
+		}
+		for k, v := range req.MultipartForm.Value {
+			m[k] = flattenSingleSlice(v)
+		}
+		for k, v := range req.MultipartForm.File {
+			f[k] = v
 		}
 	default:
 		m["body"] = buf
