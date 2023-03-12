@@ -63,19 +63,22 @@ func extractRequest(m map[string]any, f map[string][]*multipart.FileHeader, req 
 		m["query_"+k] = v
 	}
 
-	// body
-	var buf []byte
-	if buf, err = io.ReadAll(req.Body); err != nil {
-		return
-	}
-
-	if len(buf) == 0 {
-		return
-	}
-
 	var contentType string
 	if contentType, _, err = mime.ParseMediaType(req.Header.Get("Content-Type")); err != nil {
 		return
+	}
+
+	// body
+	var buf []byte
+
+	if contentType != ContentTypeMultipart {
+		if buf, err = io.ReadAll(req.Body); err != nil {
+			return
+		}
+
+		if len(buf) == 0 {
+			return
+		}
 	}
 
 	switch contentType {
